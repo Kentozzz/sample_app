@@ -20,15 +20,30 @@
 
 <script setup lang="ts">
 
-import { ref, computed, Ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import ButtonControl from './components/ButtonControl.vue';
 
-const inputMinutes: Ref<number> = ref(0);
-const startingTime: Ref<number> = ref(0);
-const time: Ref<number> = ref(0);
-const timerId = ref<ReturnType<typeof setInterval> | null>(null);
-const timeSet: Ref<boolean> = ref(false);
+const inputMinutes = ref(0);
+const startingTime = ref(0);
+const time = ref(0);
+const timerId = ref<number | null>(null);
+const timeSet = ref(false);
 
+onMounted(() => {
+  const savedTime = localStorage.getItem('savedTime');
+  const savedTimestamp = localStorage.getItem('savedTimestamp');
+
+  if (savedTime !== null && savedTimestamp !== null) {
+    const currentTime = Date.now();
+    const elapsedSeconds = Math.floor((currentTime - Number(savedTimestamp)) / 1000);
+    let calculatedTime = Number(savedTime) - elapsedSeconds;
+    if (calculatedTime > 0) {
+      time.value = calculatedTime;
+      timeSet.value = false;
+      startTimer();
+    }
+  }
+});
 
 function setTime() {
   startingTime.value = inputMinutes.value * 60; // 入力された時間（分）を秒数に変換
@@ -40,6 +55,9 @@ function startTimer() {
   timerId.value = setInterval(() => {
     if (time.value > 0) {
       time.value -= 1; // 1秒減らす
+      localStorage.setItem('savedTime', time.value.toString()); // 数値を文字列に変換
+      localStorage.setItem('savedTimestamp', Date.now().toString()); // Date.now()は数値を返すため、同様に文字列に変換する
+
       // タイマーが0になった時の処理
       if (time.value === 0) {
         setTimeout(() => {
@@ -70,7 +88,7 @@ function resetTimer() {
 
 const formatTime = computed(() => {
   const minutes = Math.floor(time.value / 60);
-  const seconds = ((time.value / 60) % 1) * 60;
+  const seconds = time.value % 60;
   return `${minutes}:${seconds.toFixed(0).padStart(2, '0')}`;
 });
 

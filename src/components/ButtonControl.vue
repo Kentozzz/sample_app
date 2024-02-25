@@ -7,8 +7,7 @@
   </div>
 </template>
 
-<script setup>
-import { defineProps, defineEmits } from 'vue';
+<script setup lang="ts">
 
 defineProps({
   isSetDisabled: Boolean,
