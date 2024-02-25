@@ -32,16 +32,26 @@ const timeSet = ref(false);
 onMounted(() => {
   const savedTime = localStorage.getItem('savedTime');
   const savedTimestamp = localStorage.getItem('savedTimestamp');
+  const timerRunning = localStorage.getItem('timerRunning') === 'true';
 
   if (savedTime !== null && savedTimestamp !== null) {
     const currentTime = Date.now();
     const elapsedSeconds = Math.floor((currentTime - Number(savedTimestamp)) / 1000);
     let calculatedTime = Number(savedTime) - elapsedSeconds;
-    if (calculatedTime > 0) {
+    if (calculatedTime > 0 && timerRunning) {
       time.value = calculatedTime;
+      timeSet.value = true;
+      startTimer(); // タイマー再開
+    } else if (!timerRunning) {
+      calculatedTime = Number(savedTime); 
+      time.value = calculatedTime > 0 ? calculatedTime : 0;
+      timeSet.value = true;
+    } else {
+      time.value = 0;
+      startingTime.value = 0;
       timeSet.value = false;
-      startTimer();
     }
+
   }
 });
 
@@ -52,6 +62,7 @@ function setTime() {
 }
 
 function startTimer() {
+  localStorage.setItem('timerRunning', 'true');
   timerId.value = setInterval(() => {
     if (time.value > 0) {
       time.value -= 1; // 1秒減らす
@@ -73,6 +84,7 @@ function stopTimer() {
   if (timerId.value !== null) {
     clearInterval(timerId.value);
     timerId.value = null;
+    localStorage.setItem('timerRunning', 'false');
   }
 }
 
@@ -83,6 +95,9 @@ function resetTimer() {
     timerId.value = null; 
   }
   time.value = startingTime.value;
+  localStorage.removeItem('savedTime');
+  localStorage.removeItem('savedTimestamp');
+  localStorage.removeItem('timerRunning');
 }
 
 
