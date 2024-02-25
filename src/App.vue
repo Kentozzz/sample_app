@@ -2,7 +2,7 @@
   <div id="app">
     <div>
       <label for="timeInput">カウントダウン時間（分）:</label>
-      <input id="timeInput" type="number" v-model.number="inputMinutes" step="1" />
+      <input id="timeInput" type="number" v-model.number="inputMinutes" step="1" min="0"/>
     </div>
     <div class="timer">{{ formatTime }}</div>
     <ButtonControl
@@ -38,10 +38,11 @@ onMounted(() => {
     const currentTime = Date.now();
     const elapsedSeconds = Math.floor((currentTime - Number(savedTimestamp)) / 1000);
     let calculatedTime = Number(savedTime) - elapsedSeconds;
+
     if (calculatedTime > 0 && timerRunning) {
       time.value = calculatedTime;
       timeSet.value = true;
-      startTimer(); // タイマー再開
+      startTimer();
     } else if (!timerRunning) {
       calculatedTime = Number(savedTime); 
       time.value = calculatedTime > 0 ? calculatedTime : 0;
@@ -51,7 +52,6 @@ onMounted(() => {
       startingTime.value = 0;
       timeSet.value = false;
     }
-
   }
 });
 
