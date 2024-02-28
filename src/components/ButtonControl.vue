@@ -32,4 +32,5 @@ const stopTimer = () => {
 const resetTimer = () => {
   emit('resetTimer');
 };
+
 </script>
